@@ -9,7 +9,7 @@ Build with
 mkdir build
 cd build
 cmake ../
-cmake --build .
+cmake --build . -DCMAKE_BUILD_TYPE=Debug
 ```
 
 Run with

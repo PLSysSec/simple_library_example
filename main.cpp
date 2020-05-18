@@ -37,7 +37,7 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    char* output_stream = new char[header->width * header->height];
+    char* output_stream = new char[header->height * header->width];
     if (!output_stream) {
         std::cerr << "Error: " << PROGRAM_ERR_MSG[MEMORY_ALLOC_MSG] << "\n";
         return 1;
@@ -45,6 +45,14 @@ int main(int argc, char const *argv[])
 
     parse_image_body(input_stream, header, image_parsing_progress, output_stream);
 
+    std::cout << "Image pixels: ";
+    for (unsigned int i = 0; i < header->height; i++) {
+        for (unsigned int j = 0; j < header->width; j++) {
+            unsigned int index = i * header->width + j;
+            std::cout << (unsigned int) output_stream[index] << " ";
+        }
+    }
+    std::cout << "\n";
 
     free(header);
     delete input_stream;
