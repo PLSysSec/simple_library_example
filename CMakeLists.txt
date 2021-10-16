@@ -11,5 +11,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(img_lib STATIC lib.c)
 target_include_directories(img_lib PUBLIC ${CMAKE_SOURCE_DIR})
 
+add_compile_options(-Wall -Wextra) # warnings
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-fsanitize=address -Wno-unused-parameter -Wno-sign-compare)
+  add_link_options(-fsanitize=address)
+  add_compile_options(-fsanitize=undefined)
+  add_link_options(-fsanitize=undefined)
+endif()
+
 add_executable(img_app main.cpp)
+target_include_directories(img_app PUBLIC "${CMAKE_SOURCE_DIR}/../rlbox_sandboxing_api/code/include/")
 target_link_libraries(img_app img_lib)
+
+add_executable(img_app_solution solution.cpp)
+target_include_directories(img_app_solution PUBLIC "${CMAKE_SOURCE_DIR}/../rlbox_sandboxing_api/code/include/")
+target_link_libraries(img_app_solution img_lib)

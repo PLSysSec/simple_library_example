@@ -18,9 +18,9 @@ typedef struct {
 } ImageHeader;
 
 // Status codes used in header parsing
-#define STATUS_SUCCEEDED 0
-#define STATUS_INVALID 1
-#define STATUS_INCOMPLETE 2
+#define HEADER_PARSING_STATUS_SUCCEEDED 0
+#define HEADER_PARSING_STATUS_INVALID 1
+#define HEADER_PARSING_STATUS_INCOMPLETE 2
 
 // Callback to indicate progress
 typedef void(OnProgress)(unsigned int);
