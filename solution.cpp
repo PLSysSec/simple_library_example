@@ -51,6 +51,11 @@ void image_parsing_progress(rlbox_sandbox<sandbox_type_t>& sandbox, tainted_img<
     std::cout << "Image parsing: " << checked_progress << " out of 100\n";
 }
 
+void get_image_bytes(char* input_stream) {
+    // Get the bytes of the image from the file into input stream
+    // This is just a toy example, so we will leave this empty for now
+}
+
 // An example application that simulates a typical image parsing program
 // The library simulates a typilcal image decoding library such as libjpeg
 int main(int argc, char const *argv[])
@@ -66,9 +71,8 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    // This is where we may read bytes from an image file into input_stream
-    // But this is just a toy example
-    // So we will just assume that input_stream buffer has bytes we want to parse
+    // Read bytes from an image file into input_stream
+    get_image_bytes(input_stream);
 
     // Create a buffer that will hold the input bytes inside the sandbox
     auto tainted_input_stream = sandbox.malloc_in_sandbox<char>(100);
@@ -79,6 +83,7 @@ int main(int argc, char const *argv[])
     // Copy the input bytes into the buffer inside the sandbox
     rlbox::memcpy(sandbox, tainted_input_stream, input_stream, 100u);
 
+    // Parse header of the image to get its dimensions
     // invoke the function inside the sandbox
     // We pass in the tainted_input_stream instead of input_stream
     // This is because the sandbox cannot access input_stream since it is in

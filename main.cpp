@@ -15,6 +15,11 @@ void image_parsing_progress(unsigned int progress) {
     std::cout << "Image parsing: " << progress << " out of 100\n";
 }
 
+void get_image_bytes(char* input_stream) {
+    // Get the bytes of the image from the file into input stream
+    // This is just a toy example, so we will leave this empty for now
+}
+
 // An example application that simulates a typical image parsing program
 // The library simulates a typilcal image decoding library such as libjpeg
 int main(int argc, char const *argv[])
@@ -26,9 +31,10 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    // This is where we may read bytes from an image file into input_stream
-    // But this is just a toy example
-    // So we will just assume that input_stream buffer has bytes we want to parse
+    // Read bytes from an image file into input_stream
+    get_image_bytes(input_stream);
+
+    // Parse header of the image to get its dimensions
     ImageHeader* header = parse_image_header(input_stream);
 
     if (header->status_code != HEADER_PARSING_STATUS_SUCCEEDED) {
