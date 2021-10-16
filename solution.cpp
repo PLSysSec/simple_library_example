@@ -137,7 +137,7 @@ int main(int argc, char const *argv[])
     // invoke via sandbox_invoke and pass in tainted versions of the paramters
     sandbox_invoke(sandbox, parse_image_body, tainted_input_stream, header, cb_image_parsing_progress, tainted_output_stream);
 
-    std::cout << "Image pixels: ";
+    std::cout << "Image pixels: " << std::endl;
     // Loop now iterates over the tainted height and width of the image
     // Thus the loop exit condition "i < tainted_height" and "j < tainted_width"
     // return tainted values. We need to untaint them.
@@ -156,6 +156,7 @@ int main(int argc, char const *argv[])
             // needed.
             std::cout << (unsigned int) tainted_output_stream[index].unverified_safe_because("pixel value can be anything") << " ";
         }
+        std::cout << std::endl;
     }
     std::cout << "\n";
 
