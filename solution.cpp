@@ -6,11 +6,18 @@
 // Configure RLBox
 #define RLBOX_SINGLE_THREADED_INVOCATIONS
 
-// Configure RLBox for noop sandbox
-#define RLBOX_USE_STATIC_CALLS() rlbox_noop_sandbox_lookup_symbol
-#include "rlbox_noop_sandbox.hpp"
-
-using sandbox_type_t = rlbox::rlbox_noop_sandbox;
+#ifndef USE_NOOP
+    // Configure RLBox for wasm sandbox
+    #include "lib_wasm.h"
+    #define RLBOX_USE_STATIC_CALLS() rlbox_wasm2c_sandbox_lookup_symbol
+    #include "rlbox_wasm2c_sandbox.hpp"
+    using sandbox_type_t = rlbox::rlbox_wasm2c_sandbox;
+#else
+    // Configure RLBox for noop sandbox
+    #define RLBOX_USE_STATIC_CALLS() rlbox_noop_sandbox_lookup_symbol
+    #include "rlbox_noop_sandbox.hpp"
+    using sandbox_type_t = rlbox::rlbox_noop_sandbox;
+#endif
 
 #include "rlbox.hpp"
 using namespace rlbox;

@@ -11,6 +11,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(img_lib STATIC lib.c)
 target_include_directories(img_lib PUBLIC ${CMAKE_SOURCE_DIR})
 
+file(GLOB WASM_RT ${CMAKE_SOURCE_DIR}/wasmrt/*.c)
+
+add_library(img_lib_wasm STATIC ${WASM_RT} "${CMAKE_SOURCE_DIR}/wasm_prebuilt/lib_wasm.c")
+target_include_directories(img_lib_wasm PUBLIC "${CMAKE_SOURCE_DIR}/wasm_prebuilt"
+                                               "${CMAKE_SOURCE_DIR}/wasmrt/")
+
+############################
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-comment)
   add_compile_options(-fsanitize=address)
@@ -20,12 +28,16 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU
 endif()
 
 add_executable(img_app main.cpp)
-target_include_directories(img_app PUBLIC "${CMAKE_SOURCE_DIR}/../rlbox_sandboxing_api/code/include/")
-target_link_libraries(img_app img_lib)
+target_include_directories(img_app PUBLIC "${CMAKE_SOURCE_DIR}/rlbox/"
+                                          "${CMAKE_SOURCE_DIR}/rlbox/"
+                                          "${CMAKE_SOURCE_DIR}/wasm_prebuilt")
+target_link_libraries(img_app img_lib img_lib_wasm)
 
 add_executable(img_app_solution solution.cpp)
-target_include_directories(img_app_solution PUBLIC "${CMAKE_SOURCE_DIR}/../rlbox_sandboxing_api/code/include/")
-target_link_libraries(img_app_solution img_lib)
+target_include_directories(img_app_solution PUBLIC "${CMAKE_SOURCE_DIR}/rlbox/"
+                                                   "${CMAKE_SOURCE_DIR}/rlbox/"
+                                                   "${CMAKE_SOURCE_DIR}/wasm_prebuilt")
+target_link_libraries(img_app_solution img_lib img_lib_wasm)
 
 add_custom_target(run COMMAND $<TARGET_FILE:img_app>)
 add_dependencies(run img_app)
