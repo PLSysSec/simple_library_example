@@ -11,9 +11,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(img_lib STATIC lib.c)
 target_include_directories(img_lib PUBLIC ${CMAKE_SOURCE_DIR})
 
-add_compile_options(-Wall -Wextra) # warnings
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(-fsanitize=address -Wno-unused-parameter -Wno-sign-compare -Wno-comment)
+  add_compile_options(-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-comment)
+  add_compile_options(-fsanitize=address)
   add_link_options(-fsanitize=address)
   add_compile_options(-fsanitize=undefined)
   add_link_options(-fsanitize=undefined)
