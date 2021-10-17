@@ -8,19 +8,19 @@ You can find the RLBox tutorial [here](https://docs.rlbox.dev).
 After reading this tutorial you should be able to migrate this application to
 using sandboxed libraries using RLBox.
 
+This library has been tested on Linux, Windows and Mac.
+
 Build with
 
 ```bash
-mkdir build
-cd build
-cmake ../
-cmake --build . -DCMAKE_BUILD_TYPE=Debug
+cmake -S ./ -B ./build
+cmake --build ./build --parallel
 ```
 
 Run with
 
 ```bash
-./img_app
+cmake --build ./build --target run
 ```
 
 Application is in `main.cpp`. Library is `lib.c`.
@@ -28,6 +28,6 @@ Application is in `main.cpp`. Library is `lib.c`.
 The solution is in `solution.cpp` and can be run with
 
 ```bash
-./img_app_solution
+cmake --build ./build --target run_solution
 ```
 
