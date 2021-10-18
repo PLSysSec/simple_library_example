@@ -126,12 +126,13 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    //UNSAFE alias
-    ImageHeader* header = tainted_header.UNSAFE_unverified();
 
     // SECDEV CHECKPOINT 2
 
-    parse_image_body(input_stream, header, image_parsing_progress, output_stream);
+    sandbox_invoke(sandbox, parse_image_body, tainted_input_stream, tainted_header, image_parsing_progress, output_stream);
+
+    //UNSAFE alias
+    ImageHeader* header = tainted_header.UNSAFE_unverified();
 
     std::cout << "Image pixels: " << std::endl;
     for (unsigned int i = 0; i < header->height; i++) {
