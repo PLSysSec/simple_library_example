@@ -20,7 +20,7 @@ cmake --build ./build --parallel --config Debug --target run
 // Configure RLBox
 #define RLBOX_SINGLE_THREADED_INVOCATIONS
 
-#define USE_NOOP
+//#define USE_NOOP
 #ifndef USE_NOOP
     // Configure RLBox for noop sandbox
     #include "lib_wasm.h"
@@ -59,7 +59,7 @@ static const char* PROGRAM_STATUS_MSG [] = {
 
 #define MEMORY_ALLOC_ERR_MSG 3
 
-/**************** Codeblock2
+
 // This is mostly boilerplate, so is in comments so you can easily use it in the course of the tutorial
 //  Migrate the callback to use tainted types and take the sandbox as the first parameter
 
@@ -70,11 +70,11 @@ void image_parsing_progress(rlbox_sandbox<sandbox_type_t>& sandbox, tainted_val<
     });
     std::cout << "Image parsing: " << checked_progress << " out of 100\n";
 }
-******************/
 
-void image_parsing_progress(unsigned int progress) {
-    std::cout << "Image parsing: " << progress << " out of 100\n";
-}
+
+// void image_parsing_progress(unsigned int progress) {
+//     std::cout << "Image parsing: " << progress << " out of 100\n";
+// }
 
 void get_image_bytes(char* input_stream) {
     // Get the bytes of the image from the file into input stream
@@ -120,8 +120,8 @@ int main(int argc, char const *argv[])
 
 
     unsigned int size = (tainted_header->height * tainted_header->width).unverified_safe_because("any size ok");
-    char* output_stream = new char[size];
-    if (!output_stream) {
+    tainted_val<char*> tainted_output_stream = sandbox.malloc_in_sandbox<char>(size);
+    if (!tainted_output_stream) {
         std::cerr << "Error: " << PROGRAM_STATUS_MSG[MEMORY_ALLOC_ERR_MSG] << "\n";
         return 1;
     }
@@ -129,23 +129,22 @@ int main(int argc, char const *argv[])
 
     // SECDEV CHECKPOINT 2
 
-    sandbox_invoke(sandbox, parse_image_body, tainted_input_stream, tainted_header, image_parsing_progress, output_stream);
+    auto reg = sandbox.register_callback(image_parsing_progress);
 
-    //UNSAFE alias
-    ImageHeader* header = tainted_header.UNSAFE_unverified();
+    sandbox_invoke(sandbox, parse_image_body, tainted_input_stream, tainted_header, 
+        reg,
+        tainted_output_stream);
 
-    std::cout << "Image pixels: " << std::endl;
-    for (unsigned int i = 0; i < header->height; i++) {
-        for (unsigned int j = 0; j < header->width; j++) {
-            unsigned int index = i * header->width + j;
-            std::cout << (unsigned int) output_stream[index] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "\n";
+    // std::cout << "Image pixels: " << std::endl;
+    // for (unsigned int i = 0; i < header->height; i++) {
+    //     for (unsigned int j = 0; j < header->width; j++) {
+    //         unsigned int index = i * header->width + j;
+    //         std::cout << (unsigned int) output_stream[index] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // std::cout << "\n";
 
-    /**************** Codeblock3
-    // If we are short on time, we can directly look at the solution for this last bit
 
     std::cout << "Image pixels: " << std::endl;
     for (auto i = 0; i < tainted_header->height.unverified_safe_because("safe for any value"); i++) {
@@ -156,13 +155,13 @@ int main(int argc, char const *argv[])
         std::cout << std::endl;
     }
     std::cout << "\n";
-    ******************/
 
-    free(header);
+    sandbox.free_in_sandbox(tainted_header);
     delete[] input_stream;
     sandbox.free_in_sandbox(tainted_input_stream);
-    delete[] output_stream;
+    sandbox.free_in_sandbox(tainted_output_stream);
 
+    reg.unregister();
     sandbox.destroy_sandbox();
 
     return 0;
