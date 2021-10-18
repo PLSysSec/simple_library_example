@@ -14,7 +14,6 @@ cmake --build ./build --parallel --config Debug --target run
 */
 
 
-/**************** Codeblock1
 // This is mostly boilerplate, so is in comments so you can easily use it in the course of the tutorial
 // Include and configure rlbox.
 
@@ -51,8 +50,6 @@ f(unsigned int, height, FIELD_NORMAL, ##__VA_ARGS__) g()
 
 rlbox_load_structs_from_library(exampleapp);
 
-******************/
-
 static const char* PROGRAM_STATUS_MSG [] = {
     "Succeeded",
     "Invalid image",
@@ -88,6 +85,9 @@ void get_image_bytes(char* input_stream) {
 // The library simulates a typilcal image decoding library such as libjpeg
 int main(int argc, char const *argv[])
 {
+    rlbox_sandbox<sandbox_type_t> sandbox;
+    sandbox.create_sandbox();
+
     // create a buffer for input bytes
     char* input_stream = new char[100];
     if (!input_stream) {
@@ -98,8 +98,14 @@ int main(int argc, char const *argv[])
     // Read bytes from an image file into input_stream
     get_image_bytes(input_stream);
 
+    tainted_val<char*> tainted_input_stream = sandbox.malloc_in_sandbox<char>(100);
+    rlbox::memcpy(sandbox, tainted_input_stream, input_stream, 100);
+
     // Parse header of the image to get its dimensions
-    ImageHeader* header = parse_image_header(input_stream);
+    tainted_val<ImageHeader*> tainted_header = sandbox_invoke(sandbox, parse_image_header, tainted_input_stream);
+
+    //UNSAFE alias
+    ImageHeader* header = tainted_header.UNSAFE_unverified();
 
     // SECDEV CHECKPOINT 1
 
@@ -144,7 +150,10 @@ int main(int argc, char const *argv[])
 
     free(header);
     delete[] input_stream;
+    sandbox.free_in_sandbox(tainted_input_stream);
     delete[] output_stream;
+
+    sandbox.destroy_sandbox();
 
     return 0;
 }
