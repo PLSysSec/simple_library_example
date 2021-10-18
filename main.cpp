@@ -104,21 +104,30 @@ int main(int argc, char const *argv[])
     // Parse header of the image to get its dimensions
     tainted_val<ImageHeader*> tainted_header = sandbox_invoke(sandbox, parse_image_header, tainted_input_stream);
 
-    //UNSAFE alias
-    ImageHeader* header = tainted_header.UNSAFE_unverified();
-
     // SECDEV CHECKPOINT 1
 
-    if (header->status_code != HEADER_PARSING_STATUS_SUCCEEDED) {
-        std::cerr << "Error: " << PROGRAM_STATUS_MSG[header->status_code] << "\n";
+    tainted_val<unsigned int> tainted_status_code = tainted_header->status_code;
+    auto cond = (tainted_status_code != HEADER_PARSING_STATUS_SUCCEEDED)
+        .unverified_safe_because("worst case, program early exits");
+    if (cond) {
+        unsigned int status_code = tainted_status_code.copy_and_verify([](unsigned int val){
+            assert(val < 4);
+            return val;
+        });
+        std::cerr << "Error: " << PROGRAM_STATUS_MSG[status_code] << "\n";
         return 1;
     }
 
-    char* output_stream = new char[header->height * header->width];
+
+    unsigned int size = (tainted_header->height * tainted_header->width).unverified_safe_because("any size ok");
+    char* output_stream = new char[size];
     if (!output_stream) {
         std::cerr << "Error: " << PROGRAM_STATUS_MSG[MEMORY_ALLOC_ERR_MSG] << "\n";
         return 1;
     }
+
+    //UNSAFE alias
+    ImageHeader* header = tainted_header.UNSAFE_unverified();
 
     // SECDEV CHECKPOINT 2
 
